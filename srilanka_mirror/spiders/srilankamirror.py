@@ -1,6 +1,7 @@
 import scrapy
 
 class NewsItem(scrapy.Item):
+    date = scrapy.Field()
     topic = scrapy.Field()
     link = scrapy.Field()
     intro = scrapy.Field()
@@ -14,9 +15,10 @@ class QuotesSpider(scrapy.Spider):
     start_urls = ['https://srilankamirror.com/news?limitstart=1']
 
     def parse(self, response):
-        for item in response.xpath('//h3[@class="catItemTitle"]'): 
+        for item in response.xpath('//div[@class="catItemHeader"]'): 
             news_item = NewsItem()
             news_item['topic'] = item.css('a::text').extract_first().strip()
+            news_item['date'] = item.css('span::text').extract_first().strip()
             news_item['link'] = self.base_url + item.css('a::attr(href)').extract()[0]
             detailed_news = scrapy.Request(news_item['link'], callback=self.get_full_news)
             detailed_news.meta['news_item'] = news_item
